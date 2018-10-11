@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+export AWS_PROFILE=profile
+export ANSIBLE_USER=someone

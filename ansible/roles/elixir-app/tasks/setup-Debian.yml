@@ -1,0 +1,4 @@
+---
+- name: install required system packages (deb)
+  apt: name={{ item }} state={{ required_packages_state }} update_cache=yes
+  with_items: "{{ required_packages_deb }}"

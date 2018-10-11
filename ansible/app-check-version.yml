@@ -1,0 +1,16 @@
+---
+- name: check version of app code on app server
+  hosts: "{{ env }}_phoenix14_base_app_network_security_group"
+  pre_tasks:
+    - name: load env-specific vars
+      include_vars: "{{ item }}.yml"
+      with_items:
+        - "{{ env }}"
+        - "{{ env }}.vault"
+      tags: ["always"]
+  tasks:
+    - name: stat current code directory
+      stat: path="{{ site_dir }}"
+      register: site_dir_stat
+
+    - debug: msg="{{ site_dir_stat.stat.lnk_source | basename }}"

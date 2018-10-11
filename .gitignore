@@ -38,3 +38,9 @@ npm-debug.log
 
 # Release
 /rel/dev_set_release_env.sh
+
+# Ansible
+/ansible/misc.yml
+/ansible/set_env.sh
+/ansible/vault.key
+*.retry

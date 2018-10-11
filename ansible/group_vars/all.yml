@@ -1,0 +1,80 @@
+---
+org: pgrunwald
+org_unique: pgrunwald
+app_name: phoenix14_base
+app_name_hyphen: phoenix14-base
+domain: percygrunwald.com
+app_port: 8080
+url_port: 443
+url_scheme: https
+base_dir: /opt
+app_dir: "{{ base_dir }}/{{ app_name }}"
+repo_dir: "{{ app_dir }}/repo.git"
+releases_dir: "{{ app_dir }}/releases"
+site_dir: "{{ app_dir }}/current"
+conf_dir: "{{ app_dir }}/conf"
+log_dir: "{{ app_dir }}/logs"
+bin_dir: "{{ app_dir }}/bin"
+certs_dir: "{{ app_dir }}/certs"
+keys_dir: "{{ app_dir }}/keys"
+tmp_dir: "{{ app_dir }}/tmp"
+keep_release_count: 10
+required_packages_deb:
+  - build-essential
+  - autoconf
+  - m4
+  - libncurses5-dev
+  - libwxgtk3.0-dev
+  - libgl1-mesa-dev
+  - libglu1-mesa-dev
+  - libpng3
+  - libssh-dev
+  - unixodbc-dev
+  - xsltproc
+  - fop
+  - imagemagick
+
+required_packages_rhel:
+  - '@Development tools'
+  - autoconf
+  - ncurses-devel
+  - wxGTK-devel
+  - wxBase
+  - openssl-devel
+  - java-1.8.0-openjdk-devel
+  - libiodbc
+  - unixODBC.x86_64
+  - erlang-odbc.x86_64
+  - libxslt
+  - fop
+  - ImageMagick
+
+required_packages_state: present
+
+# Application config
+log_level: error
+app_toml_file: "{{ conf_dir }}/{{ app_name }}.toml"
+db_pool_size: 10
+sync_nodes_timeout: 10000
+
+# Users
+app_user: "{{ app_name }}"
+app_group: "{{ app_name }}"
+deploy_user: deploy
+deploy_group: deploy
+deploy_users:
+  - key: percy.pub
+admin_users:
+  - user: percy
+    key: percy.pub
+
+db_users: []
+db_remove_users: []
+
+# Postgres
+postgresql_version: 10.5
+db_port: 5432
+db_force_ssl: "true"
+
+# Nginx
+nginx_proxy_buffer_size: 8k

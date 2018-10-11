@@ -1,0 +1,54 @@
+[phoenix14_base]
+# The environment of the current server
+env = "{{ env }}"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint"]
+# Secret key base for Endpoint
+secret_key_base = "{{ secret_key_base }}"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint".url]
+# Host for generating URLs
+host = "{{ domain }}"
+
+# Port for generating URLs
+port = {{ url_port }}
+
+# Scheme for generating URLs
+scheme = "{{ url_scheme }}"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint".http]
+# Local port that Cowboy will respond to after proxy from nginx
+port = {{ app_port }}
+
+[phoenix14_base."Phoenix14Base.Repo"]
+# Database username
+username = "{{ db_user }}"
+
+# Database password
+password = "{{ db_password }}"
+
+# Database name
+database = "{{ db_database }}"
+
+# Database port
+port = {{ db_port}}
+
+# Database hostname
+hostname = "{{ db_host }}"
+
+# Database pool size
+pool_size = {{ db_pool_size }}
+
+# Database force SSL
+ssl = {{ db_force_ssl }}
+
+[logger]
+# Log level for logger
+level = "{{ log_level }}"
+
+[kernel]
+# List of erlang node names to sync, list of strings
+sync_nodes_optional = [{% for host in play_hosts %}"{{ app_name }}@{{ hostvars[host]['ansible_host'] }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+
+# How many milliseconds to wait for the other nodes to start
+sync_nodes_timeout = {{ sync_nodes_timeout }}

@@ -1,0 +1,156 @@
+---
+# tasks file for users
+
+- set_fact: admin_group=admin
+  when: ansible_os_family == 'Debian'
+  tags: ['setup']
+  # "ansible_distribution": "Ubuntu",
+
+- set_fact: admin_group=wheel
+  when: ansible_os_family == 'RedHat'
+  tags: ['setup']
+
+- set_fact: admin_groups={{ [admin_group] + admin_groups }}
+  tags: ['setup']
+
+- name: ensure admin group exists
+  group: name={{ admin_group }} state=present
+  become: true
+  tags: ['setup']
+
+- name: create ssh groups
+  group: name={{ item }} state=present
+  with_items:
+    - sshusers
+    - sftpusers
+  become: true
+  tags: ['setup']
+
+- name: install ansible dependencies
+  yum:  name={{ item }} state=present
+  with_items:
+    - libselinux-python
+  when: ansible_os_family == 'RedHat'
+  become: true
+  tags: ['setup']
+
+- name: set up sudoers for admin group
+  template: src=etc/sudoers.d/00-admin dest=/etc/sudoers.d/00-admin owner=root group=root mode=0440
+  become: true
+  tags: ['setup']
+
+#- debug: var=admin_groups
+#  tags: ['setup']
+
+# http://docs.ansible.com/ansible/user_module.html
+- name: add admin users
+  user: name={{ item.user }} groups={{ admin_groups|join(',') }} shell=/bin/bash
+  with_items: '{{ admin_users }}'
+  become: true
+  tags: ['setup']
+
+# http://docs.ansible.com/ansible/authorized_key_module.html
+- name: add ssh keys for admin users
+  authorized_key: user={{ item.user }} key="{{ lookup('file', item.key) }}"
+  with_items: '{{ admin_users }}'
+  become: true
+  tags: ['setup']
+
+- name: add regular users
+  user: name={{ item.user }} groups={{ regular_groups|join(',') }} shell=/bin/bash
+  with_items: '{{ regular_users }}'
+  become: true
+  tags: ['setup']
+
+- name: add ssh keys for regular users
+  authorized_key: user={{ item.user }} key="{{ lookup('file', item.key) }}"
+  with_items: '{{ regular_users }}'
+  become: true
+  tags: ['setup']
+
+- name: delete regular users
+  user: name={{ item }} state=absent remove=yes
+  with_items: '{{ delete_users }}'
+  become: true
+  tags: ['setup']
+
+- name: add deploy group
+  group: name={{ deploy_group }} state=present
+  when: deploy_user is defined and deploy_user != ""
+  become: true
+  tags: ['setup']
+
+- name: add deploy user
+  user:
+    name: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    groups: "{{ deploy_groups|join(',') }}"
+    shell: /bin/bash
+  when: deploy_user is defined and deploy_user != ""
+  become: true
+  tags: ['setup']
+
+- name: add ssh keys for deploy users
+  authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ lookup('file', item.key) }}"
+  with_items: '{{ deploy_users }}'
+  when: deploy_user is defined and deploy_user != ""
+  become: true
+  tags: ['setup']
+
+- name: remove ssh keys for deploy users
+  authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ lookup('file', item.key) }}"
+    state: absent
+  with_items: '{{ delete_deploy_users }}'
+  when: deploy_user is defined and deploy_user != ""
+  become: true
+  tags: ['setup']
+
+- name: add app group
+  group: name={{ app_group }} state=present
+  when: app_user is defined and app_user != ""
+  become: true
+  tags: ['setup']
+
+- name: add app user
+  user:
+    name: "{{ app_user }}"
+    group: "{{ app_group }}"
+    groups: "{{ regular_groups|join(',') }}"
+    shell: /bin/bash
+  when: app_user is defined and app_user != ""
+  become: true
+  tags: ['setup']
+
+- name: add ssh keys for app users
+  authorized_key:
+    user: "{{ app_user }}"
+    key: "{{ lookup('file', item.key) }}"
+  with_items: '{{ app_users }}'
+  when: app_user is defined and app_user != ""
+  become: true
+  tags: ['setup']
+
+- name: remove ssh keys for app users
+  authorized_key:
+    user: "{{ app_user }}"
+    key: "{{ lookup('file', item.key) }}"
+    state: absent
+  with_items: '{{ delete_app_users }}'
+  when: app_user is defined
+  become: true
+  tags: ['setup']
+
+- name: ensure there are no authorized keys present for non-cogini sudoers
+  file:
+    path: "{{ item }}/.ssh/authorized_keys"
+    state: absent
+  with_items:
+    - /root
+    - /home/ubuntu
+    - /home/centos
+  become: true
+  tags: ['setup']

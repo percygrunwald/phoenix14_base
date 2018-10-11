@@ -1,0 +1,12 @@
+{{ log_dir }}/{{ app_name }}_*.log
+{
+  su {{ app_user }} {{ app_group }}
+  daily
+  rotate 14
+  create
+  compress
+  delaycompress
+  dateext
+  dateformat -%Y%m%d-%s
+  sharedscripts
+}

@@ -1,0 +1,2 @@
+# Allow deploy user to start/stop/restart app service
+{{ deploy_user }} ALL=(root) NOPASSWD: /usr/sbin/service {{ app_name }} *

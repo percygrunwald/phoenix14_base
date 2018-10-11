@@ -1,0 +1,29 @@
+---
+- name: install nginx.org rpm key (rhel)
+  rpm_key: state=present key=http://nginx.org/keys/nginx_signing.key
+
+- name: install nginx.org repo (rhel)
+  template:
+    src: etc/yum.repos.d/nginx.repo.j2
+    dest: /etc/yum.repos.d/nginx.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: install nginx (rhel)
+  yum: name=nginx state={{ nginx_package_state }} update_cache=yes
+
+- name: install selinux-related python binaries for Ansible to work
+  yum: name={{ item }} state=present
+  with_items:
+    - libselinux-python
+    - libsemanage-python
+
+- name: set required selinux flags on
+  seboolean: name={{ item }} state=yes persistent=yes
+  with_items:
+    - httpd_can_network_connect
+    - httpd_can_network_relay
+
+- name: set nginx_user fact (rhel)
+  set_fact: nginx_user=nginx

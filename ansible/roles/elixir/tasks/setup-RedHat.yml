@@ -1,0 +1,31 @@
+---
+- name: install epel-release
+  yum:
+    name: epel-release
+    state: latest
+
+- name: add erlang solutions public key
+  rpm_key:
+    key: "{{ elixir_erlang_solutions_key_url }}"
+    state: present
+
+- name: add erlang solutions yum repo file
+  copy:
+    src: etc/yum.repos.d/erlang_solutions.repo
+    dest: /etc/yum.repos.d/erlang_solutions.repo
+
+- name: install erlang package
+  yum:
+    name: erlang
+    state: "{{ elixir_erlang_package_state }}"
+    update_cache: true
+
+- name: install additional packages
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - gcc-c++
+    - make
+    - openssl-devel

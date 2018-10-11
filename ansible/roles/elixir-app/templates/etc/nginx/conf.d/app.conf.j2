@@ -1,0 +1,66 @@
+upstream app {
+{% for host in play_hosts %}
+    server {{ hostvars[host]["ansible_host"] }}:{{ app_port }} max_fails=0{% if ansible_host != hostvars[host]["ansible_host"] %} backup{% endif %};
+{% endfor %}
+}
+
+{% if env == 'prod' or env == 'staging' or env == 'demo' %}
+# respond with 444 to all requests that don't match the
+# domain at all (e.g. requests for the IP)
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name _;
+
+    ssl_certificate {{ certs_dir }}/server.crt;
+    ssl_certificate_key {{ certs_dir }}/server.key;
+    ssl_session_timeout 5m;
+    return 444;
+}
+
+# redirect http requests for URLs matching the domain to https
+server {
+    listen 80;
+    server_name {{ server_name }};
+    return 302 https://$host$request_uri;
+}
+{% endif %}
+
+server {
+    server_name {{ server_name }};
+
+{% if env == 'dev' or env == 'test' %}
+    listen 80;
+{% else %}
+    listen 443 ssl;
+    ssl_certificate {{ certs_dir }}/server.crt;
+    ssl_certificate_key {{ certs_dir }}/server.key;
+    ssl_session_timeout 5m;
+{% endif %}
+
+    root {{ site_dir }};
+
+    access_log {{ log_dir }}/nginx_access.log json;
+    error_log  {{ log_dir }}/nginx_error.log;
+
+    location / {
+        try_files $uri @proxy;
+    }
+
+    location @proxy {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 60s;
+{% if nginx_proxy_buffer_size is defined %}
+        proxy_buffer_size {{ nginx_proxy_buffer_size }};
+        proxy_buffers 8 {{ nginx_proxy_buffer_size }};
+{% endif %}
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_pass http://app;
+    }
+}

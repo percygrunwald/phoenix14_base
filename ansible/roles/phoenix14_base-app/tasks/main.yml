@@ -1,0 +1,12 @@
+---
+- name: install app config files
+  template:
+    src: "app/conf/app.{{ item }}.j2"
+    dest: "{{ conf_dir }}/{{ app_name }}.{{ item }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ app_group }}"
+    mode: 0644
+  with_items:
+    - toml
+  notify: restart app
+  tags: ["app-config"]

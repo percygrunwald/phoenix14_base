@@ -1,0 +1,180 @@
+---
+- name: set erlang_node_name fact
+  set_fact:
+    erlang_node_name: "{{ app_name }}@{{ ansible_host }}"
+
+- name: ensure work dir exists
+  file:
+    path: "{{ work_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+  become: true
+  become_user: "{{ root_user }}"
+
+- name: ensure tmp directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items: "{{ tmp_directories }}"
+
+- name: pull latest source code from git
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ work_dir }}"
+    version: "{{ git_branch }}"
+    key_file: "{{ keys_dir }}/repo-key.pem"
+    accept_hostkey: true
+    force: true
+
+- name: run asdf plugin-update
+  command: "asdf plugin-update --all"
+  environment: "{{ common_env }}"
+  become: true
+  become_user: "{{ root_user }}"
+
+- name: run asdf install
+  command: "{{ item }}"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  become: true
+  become_user: "{{ root_user }}"
+  with_items:
+    - "asdf install"
+
+- name: ensure hex and rebar are installed
+  command: "mix local.{{ item }} --force"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  become: true
+  become_user: "{{ root_user }}"
+  with_items:
+    - hex
+    - rebar
+
+- name: clean deps if elixir_clean_deps is defined
+  command: "mix deps.clean --all"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  when: elixir_clean_deps is defined
+
+- name: clean _build if elixir_clean_build is defined
+  file:
+    path: "{{ work_dir }}/_build"
+    state: absent
+  when: elixir_clean_build is defined
+
+- name: run mix tasks
+  command: "mix {{ item }}"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  with_items: "{{ mix_tasks }}"
+
+- name: run npm install and prune
+  shell: "(cd {{ node_modules_relative_parent_dir}} && npm {{ item }})"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  with_items:
+    - install
+    - prune
+
+- name: run extra pre-build commands
+  shell: "{{ item }}"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+  with_items: "{{ pre_build_commands }}"
+
+- name: remove priv/static directory so that static assets are reset
+  file:
+    path: "{{ work_dir }}/priv/static"
+    state: absent
+
+- name: run brunch build
+  shell: "(cd {{ node_modules_relative_parent_dir }} && node_modules/.bin/brunch build {{ (env == 'dev') | ternary('',
+    '--production') }})"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+
+- name: run phoenix digest
+  command: "mix phoenix.digest"
+  args:
+    chdir: "{{ work_dir }}"
+  environment: "{{ common_env }}"
+
+- name: set release version parts facts (datetime + git commit hash)
+  set_fact:
+    release_commit: "{{ lookup('pipe', git_release_commit_command) }}"
+    release_datetime: "{{ lookup('pipe', 'date -u +%Y%m%d%H%M%SZ') }}"
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: set release version fact
+  set_fact:
+    release_version: "{{ release_datetime }}_{{ release_commit }}"
+  run_once: true
+  delegate_to: 127.0.0.1
+
+- name: set current release dir fact
+  set_fact:
+    current_release_dir: "{{ releases_dir }}/{{ release_version }}"
+
+- name: build release
+  command: "mix release"
+  args:
+    chdir: "{{ work_dir }}"
+  environment:
+    PATH: "{{ common_env.PATH }}"
+    MIX_ENV: "{{ common_env.MIX_ENV }}"
+    RELEASE_VERSION: "{{ release_version }}"
+
+- name: create dir for current release
+  file:
+    path: "{{ current_release_dir }}"
+    state: directory
+
+- name: extract release to current release dir
+  unarchive:
+    src: "{{ erlang_releases_base_dir }}/{{ release_version }}/{{ app_name }}.tar.gz"
+    dest: "{{ current_release_dir }}"
+    remote_src: true
+
+- name: set correct permissions for release_mutable_dir
+  file:
+    path: "{{ current_release_dir }}/var"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0755
+  become: true
+  become_user: "{{ root_user }}"
+
+- name: run release tasks on single machine
+  command: "{{ current_release_dir }}/bin/{{ app_name }} {{ item }}"
+  environment:
+    CONFORM_CONF_PATH: "{{ app_conf_file }}"
+    CONFIG_PATH: "{{ app_toml_file }}"
+    REPLACE_OS_VARS: true
+    NODE_NAME: "{{ erlang_node_name }}"
+    COOKIE: "{{ erlang_distribution_protocol_cookie }}"
+  run_once: true
+  become: true
+  become_user: "{{ app_user }}"
+  with_items: "{{ release_tasks }}"
+
+- name: update site dir to symlink to current release dir
+  file:
+    src: "{{ current_release_dir }}"
+    dest: "{{ site_dir }}"
+    state: link
+
+- name: prune releases directory to keep only most recent releases
+  shell: "ls -1dt {{ releases_dir }}/* | tail -n +{{ (keep_release_count | int) + 1 }} | xargs rm -rf"
+  become: true
+  become_user: "{{ root_user }}"

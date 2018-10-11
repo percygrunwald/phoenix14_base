@@ -1,0 +1,6 @@
+---
+ansible_become: true
+required_packages_rhel: []
+required_packages_deb: []
+required_packages_state: present
+server_name: "*.example.com"

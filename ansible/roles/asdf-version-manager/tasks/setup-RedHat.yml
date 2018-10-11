@@ -1,0 +1,18 @@
+---
+- name: install epel-release
+  yum: name=epel-release state=present
+
+- name: install required packages
+  yum: name="{{ item }}" state=present update_cache=yes
+  with_items:
+    - automake
+    - autoconf
+    - readline-devel
+    - ncurses-devel
+    - openssl-devel
+    - libyaml-devel
+    - libxslt-devel
+    - libffi-devel
+    - libtool
+    - unixODBC-devel
+    - perl-Digest-SHA

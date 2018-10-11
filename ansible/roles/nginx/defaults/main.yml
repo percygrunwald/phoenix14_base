@@ -1,0 +1,5 @@
+---
+ansible_become: true
+
+# Change to 'latest' to update package
+nginx_package_state: present

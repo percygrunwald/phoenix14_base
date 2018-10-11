@@ -1,0 +1,170 @@
+---
+- name: include distro-specific setup
+  include: "setup-{{ ansible_os_family }}.yml"
+
+- name: set erlang_node_name fact
+  set_fact:
+    erlang_node_name: "{{ app_name }}@{{ ansible_host }}"
+  tags: ["app-config"]
+
+- name: ensure required deploy directories exist with correct permissions
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ app_group }}"
+    recurse: "{{ item.recurse | default('false') }}"
+    mode: "{{ item.mode | default('0750') }}"
+  with_items:
+    - { path: "{{ app_dir }}", mode: "0755"}
+    - { path: "{{ releases_dir }}" }
+    - { path: "{{ bin_dir }}" }
+    - { path: "{{ certs_dir }}" }
+    - { path: "{{ keys_dir }}" }
+    - { path: "{{ conf_dir }}", mode: "0770" }
+    - { path: "{{ tmp_dir }}", mode: "0770" }
+    - { path: "{{ log_dir }}", mode: "0770" }
+
+- name: set selinux security context for directories that web services will access
+  when: ansible_os_family == 'RedHat'
+  command: "chcon -Rv --type={{ item.type }} {{ item.dir }}"
+  with_items:
+    - { dir: "{{ app_dir }}", type: "httpd_sys_content_t" }
+    - { dir: "{{ log_dir }}", type: "httpd_log_t" }
+    - { dir: "{{ tmp_dir }}", type: "httpd_sys_rw_content_t" }
+
+- name: install app env file
+  template:
+    src: "app/conf/app.env.j2"
+    dest: "{{ conf_dir }}/{{ app_name }}.env"
+    owner: "{{ deploy_user }}"
+    group: "{{ app_group }}"
+    mode: 0644
+  notify: restart app
+  tags: ["app-config"]
+
+# App config file handled by specific role for app
+
+- name: install ssl certs
+  when: env == 'staging' or env == 'prod' or env == 'demo'
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ certs_dir }}/server.{{ item.ext }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+    - ext: key
+      content: "{{ ssl_key }}"
+    - ext: crt
+      content: "{{ ssl_cert }}"
+  notify: restart nginx
+  no_log: true
+  tags: ["nginx-config"]
+
+- name: install public keys
+  copy:
+    content: "{{ item.key }}"
+    dest: "{{ keys_dir }}/{{ item.name }}-pub.pem"
+    owner: "{{ deploy_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+  with_items: "{{ public_keys }}"
+  no_log: true
+  tags: ["keys"]
+
+- name: install private keys
+  copy:
+    content: "{{ item.key }}"
+    dest: "{{ keys_dir }}/{{ item.name }}-key.pem"
+    owner: "{{ deploy_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+  with_items: "{{ private_keys }}"
+  no_log: true
+  tags: ["keys"]
+
+- name: install deploy keys
+  copy:
+    content: "{{ item.key }}"
+    dest: "{{ keys_dir }}/{{ item.name }}-key.pem"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: 0600
+  with_items: "{{ deploy_keys }}"
+  no_log: true
+  tags: ["keys"]
+
+- name: install app nginx config
+  template:
+    src: etc/nginx/conf.d/app.conf.j2
+    dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+    owner: root
+    group: root
+    mode: 0755
+  notify: restart nginx
+  tags: ["nginx-config"]
+
+- name: set nginx user to app user
+  lineinfile:
+    dest: /etc/nginx/nginx.conf
+    regexp: '^user\s+[a-z-_]+;'
+    line: "user {{ app_user }};"
+  notify: restart nginx
+  tags: ["nginx-config"]
+
+- name: disable default nginx configs
+  file:
+    path: "/etc/nginx/{{ item }}"
+    state: absent
+  with_items:
+    - sites-enabled/default.conf
+    - sites-enabled/default
+    - conf.d/default.conf
+    - conf.d/default
+  notify: restart nginx
+  tags: ["nginx-config"]
+
+- name: create app systemd unit (centos 7)
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+  template:
+    src: etc/systemd/system/app.service.j2
+    dest: "/etc/systemd/system/{{ app_name }}.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: service_result
+  tags: ["app-config"]
+
+- name: add permissions for deploy user to modify the app service
+  template:
+    src: etc/sudoers.d/10-deploy-user.j2
+    dest: /etc/sudoers.d/10-deploy-user
+    validate: "visudo -cf %s"
+
+- name: remove require tty for sudoers to enable sudo from git hooks
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: '(^|#)Defaults\s+requiretty'
+    line: "#Defaults requiretty"
+    validate: "visudo -cf %s"
+
+- name: install logrotate configurations
+  template:
+    src: "etc/logrotate.d/{{ item }}.j2"
+    dest: "/etc/logrotate.d/{{ item }}"
+    owner: root
+    group: root
+  with_items:
+    - app
+    - app-nginx
+
+- name: reload daemon
+  when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7' and service_result.changed
+  command: systemctl daemon-reload
+  notify: restart app
+  tags: ["app-config"]
+
+- name: ensure the service is started and enabled
+  service: name="{{ app_name }}" state=started enabled=true
+  tags: ["app-config"]

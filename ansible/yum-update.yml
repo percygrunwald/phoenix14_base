@@ -1,0 +1,44 @@
+# Runs `yum update` and reboots the instance. 
+# Runs with `serial == 1` and pauses before moving on to the next host.
+#
+# ansible-playbook -v -D yum-update.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
+# ansible-playbook -v -D -l dev_phoenix14_base_0_virtual_machine yum-update.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
+---
+- name: run yum update against all instances 1 at a time
+  hosts: '{{ env }}_phoenix14_base{{ update_group }}*'
+  serial: 1
+  max_fail_percentage: 0
+  tasks:
+    - name: yum update all
+      become: true
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+      register: yum_update_result
+
+    - name: restart instance
+      become: true
+      shell: sleep 2 && /sbin/shutdown -r now "Ansible system package upgraded"
+      async: 1
+      poll: 0
+      when: yum_update_result.changed
+      register: restart_instance_result
+
+    - name: wait for instance to come back up after reboot
+      wait_for:
+        host: "{{ ansible_host }}" 
+        state: started
+        port: 22
+        delay: 10
+      delegate_to: "localhost"
+      when: restart_instance_result.changed
+
+    - set_fact: last_host_inventory_hostname="{{ ansible_play_hosts | last }}"
+
+    - name: pause execution if there are multiple hosts
+      pause: prompt="Continue to next host? (only 'yes' will continue)"
+      when: "(ansible_play_hosts | length) > 0 and inventory_hostname != last_host_inventory_hostname"
+      register: prompt_answer
+      failed_when: prompt_answer.user_input != 'yes'
+      

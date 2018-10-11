@@ -1,0 +1,5 @@
+---
+# selinux/defaults/main.yml
+
+# selinux mode: enforcing, permissive or disabled
+selinux_state: enforcing

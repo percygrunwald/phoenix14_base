@@ -1,0 +1,16 @@
+---
+# selinux/tasks/main.yml
+- name: install python libs to manage selinux
+  yum: name={{ item }} state=present
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - libselinux-python
+    - policycoreutils-python
+
+- name: set selinux state
+  selinux: state={{ selinux_state }}
+  when: ansible_os_family == 'RedHat' and selinux_state == 'disabled'
+
+- name: set selinux state
+  selinux: policy=targeted state={{ selinux_state }}
+  when: ansible_os_family == 'RedHat' and selinux_state != 'disabled'

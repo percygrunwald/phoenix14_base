@@ -1,0 +1,23 @@
+---
+- name: add nginx repo (deb)
+  apt_repository: repo='ppa:nginx/stable' state=present
+
+- name: install nginx (deb)
+  apt: name=nginx state={{ nginx_package_state }} update_cache=yes
+
+- name: remove sites- directories
+  file: path="/etc/nginx/{{ item }}" state=absent
+  with_items:
+    - sites-enabled
+    - sites-available
+
+- name: create conf.d
+  file:
+    path: /etc/nginx/conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+
+- name: set nginx_user fact (deb)
+  set_fact: nginx_user=www-data

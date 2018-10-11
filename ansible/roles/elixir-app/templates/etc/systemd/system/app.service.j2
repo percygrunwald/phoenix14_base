@@ -1,0 +1,21 @@
+[Unit]
+Description=Service for {{ app_name }}
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ site_dir }}
+User={{ app_user }}
+Group={{ app_group }}
+EnvironmentFile={{ conf_dir }}/{{ app_name }}.env
+ExecStart={{ site_dir }}/bin/{{ app_name }} foreground
+KillMode=process
+SuccessExitStatus=143
+TimeoutStartSec=10
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+SyslogIdentifier={{ app_name }}
+
+[Install]
+WantedBy=multi-user.target

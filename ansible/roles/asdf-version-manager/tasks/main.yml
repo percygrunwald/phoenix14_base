@@ -1,0 +1,37 @@
+---
+- name: include OS-specific setup
+  include: "setup-{{ ansible_os_family }}.yml"
+
+- name: install asdf version manager in common directory
+  git:
+    repo: https://github.com/asdf-vm/asdf.git
+    version: v0.3.0
+    dest: "{{ asdf_base_dir }}"
+
+- name: install asdf shim to bashrc
+  lineinfile:
+    path: "/home/{{ item }}/.bashrc"
+    line: "source {{ asdf_base_dir }}/asdf.sh"
+  become: true
+  become_user: "{{ item }}"
+  with_items: "{{ asdf_install_for_users }}"
+
+- name: install asdf shim to bash_profile
+  lineinfile:
+    path: "/home/{{ item }}/.bash_profile"
+    line: "source {{ asdf_base_dir }}/asdf.sh"
+  become: true
+  become_user: "{{ item }}"
+  with_items: "{{ asdf_install_for_users }}"
+
+- name: install plugins
+  shell: "{{ asdf_executable }} plugin-add {{ item.name }} {{ item.repo }}"
+  with_items: "{{ asdf_install_plugins }}"
+  register: install_plugin_result
+  failed_when: install_plugin_result.rc == 1 and 'already added' not in install_plugin_result.stderr
+
+- name: run extra commands
+  shell: "{{ asdf_extra_commands | join(' && ') }}"
+  become: true
+  become_user: "{{ item }}"
+  with_items: "{{ asdf_install_for_users + ['root'] }}"

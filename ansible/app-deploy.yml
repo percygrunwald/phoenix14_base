@@ -1,0 +1,57 @@
+---
+- name: deploy application
+  hosts: "{{ env }}_phoenix14_base_app_network_security_group"
+  become: true
+  become_user: "{{ deploy_user }}"
+  vars:
+    repo_url: git@github.com:pgrunwald/phoenix14_base.git
+    git_branch: "{{ env }}"
+    work_dir: "/mnt/resource/{{ app_name }}_build"
+    asdf_base_dir: "/opt/asdf"
+    path_with_asdf: "{{ asdf_base_dir }}/bin:{{ asdf_base_dir }}/shims:{{ ansible_env.PATH }}"
+    erlang_releases_base_dir: "{{ work_dir }}/_build/release/rel/{{ app_name }}/releases"
+    mix_env: release
+    root_user: root
+    git_release_commit_command: "git rev-parse --short {{ env }}"
+    tmp_directories:
+      - "{{ ua_inspector_database_path }}"
+    common_env:
+      PATH: "{{ path_with_asdf }}"
+      MIX_ENV: "{{ mix_env }}"
+      ENV: "{{ env }}"
+    mix_tasks:
+      - "deps.get --only {{ env }}"
+      - "deps.clean --unused"
+      - compile
+      - ua_inspector.download.databases
+      - ua_inspector.download.short_code_maps
+    pre_build_commands:
+      - "elm-package install --yes"
+      - "cp ./priv/ua_inspector/* {{ ua_inspector_database_path }}/"
+    node_modules_relative_parent_dir: "."
+    release_tasks:
+      - migrate
+      - ensure_assessments
+      - ensure_business_lines
+  pre_tasks:
+    - name: load env-specific vars
+      include_vars: "{{ item }}.yml"
+      with_items:
+        - "{{ env }}"
+        - "{{ env }}.vault"
+      tags: ["always"]
+  tasks:
+    - name: include deploy tasks
+      include_tasks: "tasks/elixir-deploy.yml"
+      tags: ["always"]
+
+- name: restart application
+  hosts: "{{ env }}_phoenix14_base_app_network_security_group"
+  become: true
+  serial: 1
+  tasks:
+    - name: restart application
+      service: name="{{ app_name }}" state=restarted
+
+    - name: pause to allow application to start accepting requests
+      pause: seconds=5

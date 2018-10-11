@@ -1,0 +1,20 @@
+---
+ansible_become: true
+asdf_base_dir: /opt/asdf
+asdf_shims_dir: "{{ asdf_base_dir }}/shims"
+asdf_executable: "{{ asdf_base_dir }}/bin/asdf"
+asdf_install_plugins:
+  - name: erlang
+    repo: https://github.com/asdf-vm/asdf-erlang
+  - name: elixir
+    repo: https://github.com/asdf-vm/asdf-elixir
+  - name: nodejs
+    repo: https://github.com/asdf-vm/asdf-nodejs
+  - name: elm
+    repo: https://github.com/vic/asdf-elm
+
+asdf_extra_commands:
+  - "{{ asdf_base_dir }}/plugins/nodejs/bin/import-release-team-keyring"
+
+asdf_sudo_shims:
+  - mix

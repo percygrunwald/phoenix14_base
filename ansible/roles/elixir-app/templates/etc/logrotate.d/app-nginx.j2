@@ -1,0 +1,15 @@
+{{ log_dir }}/nginx_*.log
+{
+  su {{ app_user }} {{ app_group }}
+  daily
+  rotate 14
+  create
+  compress
+  delaycompress
+  dateext
+  dateformat -%Y%m%d-%s
+  sharedscripts
+  postrotate
+      /bin/kill -USR1 $(cat /var/run/nginx.pid 2>/dev/null) 2>/dev/null || :
+  endscript
+}

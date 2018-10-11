@@ -1,0 +1,51 @@
+---
+# Admin users can log in and have sudo
+admin_users:
+  - user: dragan
+    key: cogini-dragan.pub
+  - user: jake
+    key: cogini-jake.pub
+  - user: tuan
+    key: cogini-tuan.pub
+  - user: percy
+    key: cogini-percy.pub
+
+# Regular users can log in but cannot sudo
+regular_users: []
+#regular_users:
+#  - user: dom
+#    key: strata-dom.pub
+
+# Users to delete, this removes their home directory as well
+delete_users: []
+#delete_users:
+#  - user: dom
+
+# Unix groups that regular users should have
+regular_groups:
+  - sshusers
+
+# Unix groups that admin users should have, in addition to 'wheel' or 'admin'
+admin_groups:
+  - sshusers
+
+app_groups:
+  - sshusers
+
+# This user owns the code
+deploy_user: deploy
+deploy_group: deploy
+deploy_groups: []
+
+# These users (ssh keys) are allowed to log in to deploy code
+deploy_users: []
+#  - key: foo-deploy.pub
+delete_deploy_users: []
+
+# This user runs the code
+app_user: "{{ app_name }}"
+app_group: "{{ app_name }}"
+app_users: []
+#app_users:
+#  - key: strata-dom.pub
+delete_app_users: []
