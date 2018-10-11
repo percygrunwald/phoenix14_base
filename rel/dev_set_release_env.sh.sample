@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Use this file to set the environment before running a release in local dev env for testing
+# Usage:
+#   MIX_ENV=release mix release
+#   source rel/dev_set_release_env.sh
+#   _build/release/rel/phoenix14_base/bin/phoenix14_base console
+
+export CONFIG_PATH=/path/to/phoenix14_base/config/phoenix14_base.dev.toml
+export REPLACE_OS_VARS=true
+export NODE_NAME=phoenix14_base@127.0.0.1
+export COOKIE=dev

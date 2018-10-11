@@ -1,0 +1,54 @@
+[phoenix14_base]
+# The environment of the current server
+env = "dev"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint"]
+# Secret key base for Endpoint
+secret_key_base = "0G3HmTcfXvaZ7S7zOphy6sSOQA3MEgMdu6CNDUHaiKXvv9CbfUbBciIGUblEpTUi"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint".url]
+# Host for generating URLs
+host = "phoenix14_base.local"
+
+# Port for generating URLs
+port = 4000
+
+# Scheme for generating URLs
+scheme = "http"
+
+[phoenix14_base."Phoenix14BaseWeb.Endpoint".http]
+# Local port that Cowboy will respond to after proxy from nginx
+port = 4000
+
+[phoenix14_base."Phoenix14Base.Repo"]
+# Database username
+username = "percy"
+
+# Database password
+password = ""
+
+# Database name
+database = "phoenix14_base_dev"
+
+# Database port
+port = 5432
+
+# Database hostname
+hostname = "localhost"
+
+# Database pool size
+pool_size = 10
+
+# Database force SSL
+ssl = false
+
+[logger]
+# Log level for logger
+level = "debug"
+
+[kernel]
+# List of erlang node names to sync, list of strings
+sync_nodes_optional = ["phoenix14_base@10.1.1.4", "phoenix14_base@10.1.1.5"]
+
+# How many milliseconds to wait for the other nodes to start
+sync_nodes_timeout = 10000
