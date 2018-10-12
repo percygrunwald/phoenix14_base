@@ -44,3 +44,7 @@ npm-debug.log
 /ansible/set_env.sh
 /ansible/vault.key
 *.retry
+
+# Terraform
+/terraform/vars/secrets/**/*.tfvars
+/terraform/set_env.sh

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-export APP_NAME_HYPHEN=phoenix14-base
-export APP_NAME_UNDERSCORE=phoenix14_base
-export APP_NAME_ALPHA=phoenix14base
-export AWS_PROFILE=pgrunwald
-export AWS_KEYPAIR=pgrunwald
-export REMOTE_STATE_S3_BUCKET_REGION="us-east-1"
-export MODULES_DIR=/Users/percy/Code/phoenix14_base/terraform/modules/aws
-export VARS_DIR=/Users/percy/Code/phoenix14_base/terraform/vars

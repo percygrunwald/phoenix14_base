@@ -1,5 +1,2 @@
-subnet_cidr_prefixes = {
-  bastion_subnet = "0"
-  app_server_subnet = "1"
-}
-app_port = 8080
+aws_region = "us-east-1"
+azs = ["us-east-1a", "us-east-1b"]

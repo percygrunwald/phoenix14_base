@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
+export ORG=pgrunwald
 export APP_NAME_HYPHEN=phoenix14-base
 export APP_NAME_UNDERSCORE=phoenix14_base
 export APP_NAME_ALPHA=phoenix14base
 export AWS_PROFILE=pgrunwald
 export AWS_KEYPAIR=pgrunwald
+export OWNER=pgrunwald
 export REMOTE_STATE_S3_BUCKET_REGION="us-east-1"
-export MODULES_DIR=/abs/path/to/modules/azure
-export VARS_DIR=/abs/path/to/vars
+export MODULES_DIR=/Users/percy/Code/phoenix14_base/terraform/modules/aws
+export VARS_DIR=/Users/percy/Code/phoenix14_base/terraform/vars
+
+export TF_VAR_env=$ENV
+export TF_VAR_app_name_hyphen=$APP_NAME_HYPHEN
+export TF_VAR_app_name_underscore=$APP_NAME_UNDERSCORE
+export TF_VAR_app_name_alpha=$APP_NAME_ALPHA
+export TF_VAR_owner=$OWNER
+export TF_VAR_remote_state_s3_bucket_name="${ORG}-${TF_VAR_app_name_hyphen}-${ENV}-tfstate"
+export TF_VAR_remote_state_s3_bucket_name_prefix="${ORG}-${TF_VAR_app_name_hyphen}"
+export TF_VAR_remote_state_s3_key_prefix="${ENV}/"
+export TF_VAR_remote_state_s3_bucket_region=$REMOTE_STATE_S3_BUCKET_REGION
