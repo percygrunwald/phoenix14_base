@@ -29,7 +29,7 @@ module "vpc" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "${var.name}"
+    Name        = "${var.app_name_hyphen}-${var.env}"
     Org         = "${var.org}"
     Environment = "${var.env}"
     Application = "${var.app_name_underscore}"

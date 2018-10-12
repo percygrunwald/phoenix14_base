@@ -48,3 +48,4 @@ npm-debug.log
 # Terraform
 /terraform/vars/secrets/**/*.tfvars
 /terraform/set_env.sh
+/terraform/**/.terragrunt-cache/

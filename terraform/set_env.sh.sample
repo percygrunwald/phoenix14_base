@@ -11,6 +11,7 @@ export MODULES_DIR=/Users/percy/Code/phoenix14_base/terraform/modules/aws
 export VARS_DIR=/Users/percy/Code/phoenix14_base/terraform/vars
 
 export TF_VAR_env=$ENV
+export TF_VAR_org=$ORG
 export TF_VAR_app_name_hyphen=$APP_NAME_HYPHEN
 export TF_VAR_app_name_underscore=$APP_NAME_UNDERSCORE
 export TF_VAR_app_name_alpha=$APP_NAME_ALPHA
