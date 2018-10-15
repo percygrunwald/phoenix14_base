@@ -31,4 +31,6 @@ release :phoenix14_base do
            transforms: [Phoenix14Base.ConfigTOMLTransform]
          ]}
       ]
+
+  set commands: [migrate: "rel/commands/migrate.sh"]
 end
