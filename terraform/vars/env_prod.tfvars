@@ -1,1 +1,1 @@
-aws_region = "us-east-1"
+# Add prod-specific vars here
