@@ -1,5 +1,12 @@
 # Phoenix14Base
 
+## How to use this repo to initialize new projects
+
+1. Clone the repo
+2. Run `/path/to/new_phoenix14.sh new_project NewProject`, where `new_project` and `NewProject` are the names of your new application in snake case and the module name. **Note: this script works like `phx.new` and will create a new directory inside the current directory.**
+
+This script will clone the repo from Github into the new directory and rename everything to match the names you entered. It will initialize a new Git repo as well. All the config files will be created by the script as well. Follow the instructions after the script runs and you'll be good to go!
+
 ## System-level Dependencies
 
 * Erlang (see .tool-versions)
