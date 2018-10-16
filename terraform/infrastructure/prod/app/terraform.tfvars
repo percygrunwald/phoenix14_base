@@ -12,5 +12,5 @@ terragrunt = {
   }
 }
 
-count = 2
-instance_size = "t2.nano"
+instance_size = "t2.micro"
+static_ip = true

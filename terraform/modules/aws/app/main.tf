@@ -69,3 +69,9 @@ resource "aws_instance" "app" {
     Owner       = "${var.owner}"
   }
 }
+
+resource "aws_eip" "app" {
+  count = "${var.static_ip * var.count}"
+  instance = "${element(aws_instance.app.*.id, count.index)}"
+  vpc = true
+}

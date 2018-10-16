@@ -19,5 +19,9 @@ variable "disk_size_gb" {
   default = 10
 }
 
+variable "static_ip" {
+  description = "Whether or not to assign a static IP"
+  default = false
+}
 
 
