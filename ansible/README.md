@@ -38,15 +38,17 @@ Make sure to update `$BASTION_USER` and `$ANSIBLE_USER` as appropriate.
 ansible-playbook app-configure.yml -D --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
 ```
 
-## Bootstrap database
+### Deploy application code to app instances
 
-This assumes that you have completed all the required steps for infrastructure provisioning outlined in `../README.md` and `../terraform/README.md`.
+```bash
+ansible-playbook app-deploy.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
+```
 
-You can connect to the database with any compatible PostgreSQL client. The username and password can be found in the `vars/{{ env }}.vault.yml` file for the current `env` and can be viewed with `ansible-vault`.
+If upgrading/downgrading Erlang/Elixir/deps, you may want to clean the deps and `_build` dir:
 
-After connecting to the database, create the following tables:
-
-* `{{ app_name }}_{{ env }}`
+```bash
+ansible-playbook app-deploy.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER elixir_clean_deps=true elixir_clean_build=true"
+```
 
 ## After initial configuration/deployment
 
@@ -80,20 +82,6 @@ The `misc.yml` playbook is ignored from the git repo, so use this playbook for r
 ansible-playbook misc.yml -D --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
 ```
 
-## Run `yum upgrade` on all machines for an environment and reboot
-
-```bash
-ansible-playbook all-yum-upgrade-reboot.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
-```
-
-## Manage DB users on Azure Postgres
-
-This playbook is run against the bastion host to manage users in the PostgreSQL server. The `db_users` variable should be set in the `vault` variables file for the environment, since it will hold passwords. The `db_remove_users` variable can be set anywhere.
-
-```bash
-ansible-playbook db-manage-users.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
-```
-
 ## Run `yum update` and reboot the instances
 
 The `yum-update.yml` playbook will run `yum update` against all the instances in `$UPDATE_GROUP` 1 by 1 with a pause between hosts requiring confirmation to continue.
@@ -102,20 +90,4 @@ The `yum-update.yml` playbook will run `yum update` against all the instances in
 # export UPDATE_GROUP=bastion || app || princex || "" ("" == update all instances in env)
 
 ansible-playbook -v -D yum-update.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER update_group=$UPDATE_GROUP"
-```
-
-## Configure `ops-elk` instance(s)
-
-```bash
-ansible-playbook -D ops-elk-configure.yml --extra-vars "env=ops ansible_user=$ANSIBLE_USER"
-
-ansible-playbook -D ops-elk-update.yml --extra-vars "env=ops ansible_user=$ANSIBLE_USER"
-```
-
-## Configure `ops-monitoring` instance(s)
-
-```bash
-ansible-playbook -D ops-monitoring-configure.yml --extra-vars "env=ops ansible_user=$ANSIBLE_USER"
-
-ansible-playbook -D ops-monitoring-update.yml --extra-vars "env=ops ansible_user=$ANSIBLE_USER"
 ```

@@ -118,3 +118,10 @@ Now you can use the following:
 ```bash
 mix test
 ```
+
+## Starting a remote console
+
+```bash
+sudo su - phoenix14_base
+env $(cat /opt/phoenix14_base/conf/phoenix14_base.env | grep -v ^# | xargs) /opt/phoenix14_base/current/bin/phoenix14_base remote_console
+```

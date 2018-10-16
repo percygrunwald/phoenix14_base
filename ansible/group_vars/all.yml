@@ -51,11 +51,19 @@ required_packages_rhel:
 
 required_packages_state: present
 
+# ASDF
+asdf_install_for_users: ["{{ app_user }}", "{{ deploy_user }}"]
+
 # Application config
-log_level: error
+log_level: debug
 app_toml_file: "{{ conf_dir }}/{{ app_name }}.toml"
 db_pool_size: 10
 sync_nodes_timeout: 10000
+db_user: "{{ app_name }}_{{ env }}"
+db_database: "{{ app_name }}_{{ env }}"
+db_host: 127.0.0.1
+db_port: 5432
+db_force_ssl: "false"
 
 # Users
 app_user: "{{ app_name }}"
@@ -72,9 +80,20 @@ db_users: []
 db_remove_users: []
 
 # Postgres
-postgresql_version: 10.5
-db_port: 5432
-db_force_ssl: "true"
+postgresql_version: 10
+postgresql_users:
+  - name: "{{ db_user }}"
+    pass: "{{ db_password }}"
+    encrypted: yes
+postgresql_databases:
+  - name: "{{ db_database }}"
+postgresql_user_privileges:
+  - name: "{{ db_user }}"
+    db: "{{ db_database }}"
+    priv: "ALL"
 
-# Nginx
+# Nginx General
 nginx_proxy_buffer_size: 8k
+
+# Nginx App
+enable_ssl: false

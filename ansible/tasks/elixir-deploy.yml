@@ -23,7 +23,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     version: "{{ git_branch }}"
-    key_file: "{{ keys_dir }}/repo-key.pem"
+    key_file: "{{ repo_key_file | default('omit') }}"
     accept_hostkey: true
     force: true
 
@@ -96,14 +96,13 @@
     state: absent
 
 - name: run brunch build
-  shell: "(cd {{ node_modules_relative_parent_dir }} && node_modules/.bin/brunch build {{ (env == 'dev') | ternary('',
-    '--production') }})"
+  shell: "(cd {{ node_modules_relative_parent_dir }} && npm run deploy)"
   args:
     chdir: "{{ work_dir }}"
   environment: "{{ common_env }}"
 
 - name: run phoenix digest
-  command: "mix phoenix.digest"
+  command: "mix phx.digest"
   args:
     chdir: "{{ work_dir }}"
   environment: "{{ common_env }}"
@@ -158,7 +157,6 @@
 - name: run release tasks on single machine
   command: "{{ current_release_dir }}/bin/{{ app_name }} {{ item }}"
   environment:
-    CONFORM_CONF_PATH: "{{ app_conf_file }}"
     CONFIG_PATH: "{{ app_toml_file }}"
     REPLACE_OS_VARS: true
     NODE_NAME: "{{ erlang_node_name }}"

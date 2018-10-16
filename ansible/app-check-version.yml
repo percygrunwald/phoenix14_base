@@ -1,6 +1,6 @@
 ---
 - name: check version of app code on app server
-  hosts: "{{ env }}_phoenix14_base_app_network_security_group"
+  hosts: "tag_Name_phoenix14_base_{{ env }}_app"
   pre_tasks:
     - name: load env-specific vars
       include_vars: "{{ item }}.yml"

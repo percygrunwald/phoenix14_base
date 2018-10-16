@@ -46,7 +46,7 @@
 # App config file handled by specific role for app
 
 - name: install ssl certs
-  when: env == 'staging' or env == 'prod' or env == 'demo'
+  when: enable_ssl
   copy:
     content: "{{ item.content }}"
     dest: "{{ certs_dir }}/server.{{ item.ext }}"
@@ -61,28 +61,6 @@
   notify: restart nginx
   no_log: true
   tags: ["nginx-config"]
-
-- name: install public keys
-  copy:
-    content: "{{ item.key }}"
-    dest: "{{ keys_dir }}/{{ item.name }}-pub.pem"
-    owner: "{{ deploy_user }}"
-    group: "{{ app_group }}"
-    mode: 0640
-  with_items: "{{ public_keys }}"
-  no_log: true
-  tags: ["keys"]
-
-- name: install private keys
-  copy:
-    content: "{{ item.key }}"
-    dest: "{{ keys_dir }}/{{ item.name }}-key.pem"
-    owner: "{{ deploy_user }}"
-    group: "{{ app_group }}"
-    mode: 0640
-  with_items: "{{ private_keys }}"
-  no_log: true
-  tags: ["keys"]
 
 - name: install deploy keys
   copy:
@@ -140,13 +118,6 @@
   template:
     src: etc/sudoers.d/10-deploy-user.j2
     dest: /etc/sudoers.d/10-deploy-user
-    validate: "visudo -cf %s"
-
-- name: remove require tty for sudoers to enable sudo from git hooks
-  lineinfile:
-    dest: /etc/sudoers
-    regexp: '(^|#)Defaults\s+requiretty'
-    line: "#Defaults requiretty"
     validate: "visudo -cf %s"
 
 - name: install logrotate configurations

@@ -1,6 +1,6 @@
 ---
 - name: configure app servers
-  hosts: "{{ env }}_phoenix14_base_app_network_security_group"
+  hosts: "tag_Name_phoenix14_base_{{ env }}_app"
   pre_tasks:
     - name: load env-specific vars
       include_vars: "{{ item }}.yml"
@@ -11,13 +11,11 @@
   roles:
     - users
     - selinux
+    - {role: hostname, hostname_instance_type: "app"}
     - ntp
     - nginx
     - git
-    - {role: asdf-version-manager, asdf_install_for_users: ["{{ app_user }}", "{{ deploy_user }}"]}
-    - {role: armor-agent, when: env == "prod"}
-    - collectd
-    - collectd-nginx
-    - collectd-write-http
+    - asdf-version-manager
     - elixir-app
+    - postgresql
     - phoenix14_base-app

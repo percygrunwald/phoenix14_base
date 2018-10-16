@@ -1,10 +1,10 @@
 upstream app {
 {% for host in play_hosts %}
-    server {{ hostvars[host]["ansible_host"] }}:{{ app_port }} max_fails=0{% if ansible_host != hostvars[host]["ansible_host"] %} backup{% endif %};
+    server {{ hostvars[host]["ansible_default_ipv4"]["address"] }}:{{ app_port }} max_fails=0{% if ansible_host != hostvars[host]["ansible_host"] %} backup{% endif %};
 {% endfor %}
 }
 
-{% if env == 'prod' or env == 'staging' or env == 'demo' %}
+{% if enable_ssl %}
 # respond with 444 to all requests that don't match the
 # domain at all (e.g. requests for the IP)
 server {
@@ -29,7 +29,7 @@ server {
 server {
     server_name {{ server_name }};
 
-{% if env == 'dev' or env == 'test' %}
+{% if not enable_ssl %}
     listen 80;
 {% else %}
     listen 443 ssl;
