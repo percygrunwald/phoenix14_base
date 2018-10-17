@@ -5,8 +5,8 @@ app_name: phoenix14_base
 app_name_hyphen: phoenix14-base
 domain: percygrunwald.com
 app_port: 8080
-url_port: 443
-url_scheme: https
+url_port: 80
+url_scheme: http
 base_dir: /opt
 app_dir: "{{ base_dir }}/{{ app_name }}"
 repo_dir: "{{ app_dir }}/repo.git"
