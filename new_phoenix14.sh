@@ -69,6 +69,15 @@ for dir in $DIRS_TO_RENAME; do
 done
 
 echo ""
+echo "Renaming files by replacing \"$ORIGINAL_APP_NAME_UNDERSCORE\" with \"$APP_NAME_UNDERSCORE\"..."
+FILES_TO_RENAME=$(find . -type f -name "*$ORIGINAL_APP_NAME_UNDERSCORE*" ! -path "*/.*" ! -path "./_build*")
+
+for file in $FILES_TO_RENAME; do
+  new_file_name=$(echo $file | sed "s/$ORIGINAL_APP_NAME_UNDERSCORE/$APP_NAME_UNDERSCORE/g")
+  mv $file $new_file_name
+done
+
+echo ""
 echo "Creating files from *.sample..."
 SAMPLES_TO_COPY=$(find . -type f -name "*.sample" ! -path "*.git*")
 
