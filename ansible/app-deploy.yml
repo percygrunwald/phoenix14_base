@@ -6,6 +6,7 @@
   vars:
     repo_url: https://github.com/pgrunwald/phoenix14_base
     git_branch: master
+    # deploy_key_name: "phoenix14-base-{{ env }}-app"
     work_dir: "{{ repo_dir }}"
     asdf_base_dir: "/opt/asdf"
     path_with_asdf: "{{ asdf_base_dir }}/bin:{{ asdf_base_dir }}/shims:{{ ansible_env.PATH }}"

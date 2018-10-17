@@ -18,12 +18,16 @@
     state: directory
   with_items: "{{ tmp_directories }}"
 
+- name: set deploy key fact
+  set_fact: deploy_key_file="{{ keys_dir }}/{{ deploy_key_name }}-deploy.key"
+  when: deploy_key_name is defined
+
 - name: pull latest source code from git
   git:
     repo: "{{ repo_url }}"
     dest: "{{ work_dir }}"
     version: "{{ git_branch }}"
-    key_file: "{{ repo_key_file | default('omit') }}"
+    key_file: "{{ deploy_key_file | default('omit') }}"
     accept_hostkey: true
     force: true
 

@@ -40,6 +40,36 @@ ansible-playbook app-configure.yml -D --extra-vars "env=$ENV ansible_user=$ANSIB
 
 ### Deploy application code to app instances
 
+**Make sure to edit `app-deploy.yml` with the correct variables for your app! (usually just repo and branch should be fine)**
+
+#### Generating deploy keys for private git repos
+
+Unless your repo is public, you will need to configure your hosted Git project with a deploy key, which allows your server(s) to pull your code from your git repo. These are the steps you will need to do:
+
+1. Generate an RSA keypair with `ssh-keygen -t rsa -b 4096 -f $KEY_NAME`
+2. Add the **private key** to your `vars/{{ env }}.vault.yml`
+
+```yaml
+# e.g. vars/prov.vault.yml
+deploy_keys:
+  - name: phoenix14-base-prod-app
+    key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      ...
+      -----END RSA PRIVATE KEY-----
+```
+
+3. Add the **public key** to your Git hosting (in Gitlab, it's under `repo > Settings > Repository > Deploy Keys`)
+4. Update your `app-deploy.yml` playbook to include your `deploy_key_name`:
+
+```yaml
+...
+      deploy_key_name: "phoenix14-base-{{ env }}-app"
+...
+```
+
+#### Deployment
+
 ```bash
 ansible-playbook app-deploy.yml --extra-vars "env=$ENV ansible_user=$ANSIBLE_USER"
 ```

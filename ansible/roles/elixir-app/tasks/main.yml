@@ -65,7 +65,7 @@
 - name: install deploy keys
   copy:
     content: "{{ item.key }}"
-    dest: "{{ keys_dir }}/{{ item.name }}-key.pem"
+    dest: "{{ keys_dir }}/{{ item.name }}-deploy.key"
     owner: "{{ deploy_user }}"
     group: "{{ deploy_group }}"
     mode: 0600
