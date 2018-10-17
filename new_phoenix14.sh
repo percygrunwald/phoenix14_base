@@ -81,10 +81,22 @@ done
 cat <<EOF
 Done! Please edit the files above (or at least the files in ./config) to match your settings and you're ready to go.
 
-**After editing the config files**, you can test your new application by running:
+You will also need to create an Ansible vault key and `prod.vault.yml` file:
 
-    # Change to your new projects directory
-    $ cd $APP_NAME_UNDERSCORE
+    $ pwgen 64 | head > ansible/vault.key
+    $ ansible-vault create ansible/vars/prod.vault.yml
+
+You should enter the following YAML data into your `prod.vault.yml` at a minimum (replace `...` with a strong random string 64 characters long):
+
+    # ansible/vars/prod.vault.yml
+    ---
+    erlang_distribution_protocol_cookie: "..."
+    db_password: "..."
+    secret_key_base: "..."
+
+    deploy_keys: []
+
+**After editing the config files**, you can test your new application by running:
 
     # Install all the deps and setup the DB
     $ mix deps.get && (cd assets && npm install) && mix ecto.setup

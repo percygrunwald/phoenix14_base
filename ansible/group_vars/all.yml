@@ -55,6 +55,7 @@ required_packages_state: present
 asdf_install_for_users: ["{{ app_user }}", "{{ deploy_user }}"]
 
 # Application config
+endpoint_host: "www.{{ domain }}"
 log_level: debug
 app_toml_file: "{{ conf_dir }}/{{ app_name }}.toml"
 db_pool_size: 10
@@ -97,3 +98,4 @@ nginx_proxy_buffer_size: 8k
 
 # Nginx App
 enable_ssl: false
+server_name: "*.{{ domain }}"
