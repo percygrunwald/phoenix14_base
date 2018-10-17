@@ -45,7 +45,8 @@
   become: true
   become_user: "{{ root_user }}"
   with_items:
-    - "asdf install"
+    - asdf install
+    - asdf reshim nodejs
 
 - name: ensure hex and rebar are installed
   command: "mix local.{{ item }} --force"
