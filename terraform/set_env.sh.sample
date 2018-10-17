@@ -15,6 +15,7 @@ export TF_VAR_org=$ORG
 export TF_VAR_app_name_hyphen=$APP_NAME_HYPHEN
 export TF_VAR_app_name_underscore=$APP_NAME_UNDERSCORE
 export TF_VAR_app_name_alpha=$APP_NAME_ALPHA
+export TF_VAR_aws_keypair=$AWS_KEYPAIR
 export TF_VAR_owner=$OWNER
 export TF_VAR_remote_state_s3_bucket_name="${ORG}-${TF_VAR_app_name_hyphen}-${ENV}-tfstate"
 export TF_VAR_remote_state_s3_bucket_name_prefix="${ORG}-${TF_VAR_app_name_hyphen}"
