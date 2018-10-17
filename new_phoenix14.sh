@@ -36,7 +36,7 @@ EXCLUDES=(--exclude-dir=_build --exclude-dir=node_modules --exclude-dir=deps --e
 echo "Cloning $REPO_URL to $APP_NAME_UNDERSCORE/..."
 git clone $REPO_URL $APP_NAME_UNDERSCORE
 rm -rf $APP_NAME_UNDERSCORE/.git
-rm -f $APP_NAME_UNDERSCORE/LICENSE
+rm -f $APP_NAME_UNDERSCORE/LICENSE $APP_NAME_UNDERSCORE/new_phoenix14.sh
 
 # Change to new directory
 cd $APP_NAME_UNDERSCORE
