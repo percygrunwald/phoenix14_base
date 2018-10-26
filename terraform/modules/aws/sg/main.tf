@@ -17,7 +17,7 @@ data "terraform_remote_state" "vpc" {
 }
 
 resource "aws_security_group" "app" {
-  name   = "${var.app_name_hyphen}-app"
+  name   = "${var.app_name_hyphen}-${var.env}-app"
   vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
 
   ingress {
