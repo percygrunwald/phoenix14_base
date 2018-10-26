@@ -94,7 +94,7 @@ Done! Please edit the files above (or at least the files in ./config) to match y
 You will also need to create an Ansible vault key and `prod.vault.yml` file:
 
     $ pwgen 64 | head > ansible/vault.key
-    $ ansible-vault create ansible/vars/prod.vault.yml
+    $ (cd ansible && ansible-vault create vars/prod.vault.yml)
 
 You should enter the following YAML data into your `prod.vault.yml` at a minimum (replace `...` with a strong random string 64 characters long):
 
