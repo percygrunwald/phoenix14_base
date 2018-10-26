@@ -1,5 +1,7 @@
 use Mix.Config
 
+config :phoenix14_base, :env, :test
+
 config :phoenix14_base, Phoenix14BaseWeb.Endpoint,
   secret_key_base: "aiHeech1oopaixez0ohX6bieDohhuoshahPh8yaeRah9gousee6nukoh3Riaja5f",
   http: [port: 4001],
