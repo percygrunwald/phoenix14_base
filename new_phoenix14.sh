@@ -87,7 +87,8 @@ for sample_file_name in $SAMPLES_TO_COPY; do
   cp $sample_file_name $new_file_name
 done
 
-cat <<EOF
+cat <<"EOF"
+
 Done! Please edit the files above (or at least the files in ./config) to match your settings and you're ready to go.
 
 You will also need to create an Ansible vault key and `prod.vault.yml` file:
