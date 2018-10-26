@@ -111,6 +111,9 @@ You should enter the following YAML data into your `prod.vault.yml` at a minimum
     # Install all the deps and setup the DB
     $ mix deps.get && (cd assets && npm install) && mix ecto.setup
 
+    # Run the tests
+    $ mix test
+
     # Run the server
     $ mix phx.server
 
