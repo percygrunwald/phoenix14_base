@@ -42,6 +42,7 @@ defmodule Phoenix14Base.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:cowboy, "~> 2.3"},
+      {:plug_cowboy, "~> 2.0"},
       {:distillery, "~> 2.0"},
       {:toml, "~> 0.1"}
     ]

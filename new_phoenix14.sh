@@ -4,7 +4,7 @@
 #   * git
 #
 # ## Usage:
-#   $ ./new_project.sh project_name ProjectName
+#   $ ./new_phoenix14.sh project_name ProjectName
 
 REPO_URL=https://github.com/pgrunwald/phoenix14_base
 ORIGINAL_APP_NAME_UNDERSCORE=phoenix14_base
@@ -22,7 +22,7 @@ Error: arguments are missing!
 
 Example:
 
-    $ ./new_project.sh project_name ProjectName
+    $ ./new_phoenix14.sh project_name ProjectName
 
 EOF
     exit 1
@@ -31,7 +31,7 @@ fi
 APP_NAME_HYPHEN=$(echo $APP_NAME_UNDERSCORE | sed 's/_/-/')
 APP_NAME_ALPHA=$(echo $APP_NAME_UNDERSCORE | sed 's/_//')
 
-EXCLUDES=(--exclude-dir=_build --exclude-dir=node_modules --exclude-dir=deps --exclude-dir='*/.*' --exclude=new_project.sh)
+EXCLUDES=(--exclude-dir=_build --exclude-dir=node_modules --exclude-dir=deps --exclude-dir='*/.*' --exclude=new_phoenix14.sh)
 
 echo "Cloning $REPO_URL to $APP_NAME_UNDERSCORE/..."
 git clone $REPO_URL $APP_NAME_UNDERSCORE
