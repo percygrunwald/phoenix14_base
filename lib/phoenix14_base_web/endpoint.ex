@@ -42,5 +42,8 @@ defmodule Phoenix14BaseWeb.Endpoint do
     key: "_phoenix14_base_key",
     signing_salt: "dUZn9FYw"
 
+  plug PhoenixGon.Pipeline,
+    env: Phoenix14Base.EnvHelpers.get_current_env()
+
   plug Phoenix14BaseWeb.Router
 end

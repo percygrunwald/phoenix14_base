@@ -44,7 +44,8 @@ defmodule Phoenix14Base.MixProject do
       {:cowboy, "~> 2.3"},
       {:plug_cowboy, "~> 2.0"},
       {:distillery, "~> 2.0"},
-      {:toml, "~> 0.1"}
+      {:toml, "~> 0.1"},
+      {:phoenix_gon, "~> 0.4"}
     ]
   end
 
